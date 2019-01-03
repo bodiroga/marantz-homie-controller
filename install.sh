@@ -38,7 +38,6 @@ usermod -a -G dialout $name
 ## Moving the program files to the installation directory
 echo -e '\nCopying the program to the installation (/opt/homie-marantz-controller) folder...'
 cp -rf $name/$name /opt
-chown -R $name /opt/$name
 
 
 ## Creating and activating the virtual environment
@@ -58,6 +57,11 @@ echo -e '\nAdding the start script file...'
 cp -rf /tmp/$name/systemd/$name.service /etc/systemd/system/$name.service
 systemctl daemon-reload
 systemctl enable $name.service
+
+
+## Fixing user permissions
+echo -e '\nFixing user permissions...'
+chown -R $name:$name /opt/$name
 
 
 ## Removing the git repository
