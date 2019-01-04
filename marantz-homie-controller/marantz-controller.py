@@ -66,9 +66,9 @@ def speakersConfigHandler(property, value):
     elif value == "b":
         marantz_handler.send_commands(["@SPK:11", "@SPK:22"])
     elif value == "ab":
-        marantz_handler.send_command(["@SPK:12", "@SPK:22"])
+        marantz_handler.send_commands(["@SPK:12", "@SPK:22"])
     elif value == "off":
-        marantz_handler.send_command(["@SPK:11", "@SPK:21"])
+        marantz_handler.send_commands(["@SPK:11", "@SPK:21"])
 
 
 def event_callback(category, value):
