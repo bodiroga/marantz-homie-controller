@@ -32,7 +32,7 @@ fi
 
 ## Moving the program files to the installation directory
 echo -e '\nCopying the program to the installation (/opt/homie-marantz-controller) folder...'
-cp -rf $name/$name /opt
+cp -rf $name /opt
 
 
 ## Creating and activating the virtual environment
@@ -55,7 +55,7 @@ systemctl enable $name.service
 
 ## Fixing user permissions
 echo -e '\nFixing user permissions...'
-chown -R $name:$name /opt/$name
+chown -R $user:$user /opt/$name
 
 
 ## Removing the git repository
