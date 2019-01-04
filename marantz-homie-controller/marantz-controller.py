@@ -20,10 +20,35 @@ speakersNode = device.addNode("speakers", "speakers", "speakers")
 sourceNode = device.addNode("source", "source", "source")
 
 powerProperty = powerNode.addProperty("on", "On", datatype="boolean")
-volumeProperty = volumeNode.addProperty("volume", "Volume", datatype="integer", format="-60:10")
+volumeProperty = volumeNode.addProperty("volume", "Volume", datatype="integer", format="0:100")
 speakersProperty = speakersNode.addProperty("speakers", "Speaker Config", datatype="enum", format="a,b,ab,off")
 sourceProperty =  sourceNode.addProperty("source", "Source", datatype="enum", format="tv,dvd,vcr,cd")
 
+class MarantzVolumeMapper(object):
+
+    def __init__(self, original_min=-50, original_max=0, map_min=0, map_max=100):
+        self.original_min = original_min
+        self.original_max = original_max
+        self.map_min = map_min
+        self.map_max = map_max
+
+    def original_to_map(self, original):
+        original = int(original)
+        if original < self.original_min:
+            return self.map_min
+        elif original > self.original_max:
+            return self.map_max
+        map = (original-self.original_min)/(self.original_max-self.original_min)*(self.map_max-self.map_min)+self.map_min
+        return int(map)
+
+    def map_to_original(self, map):
+        map = int(map)
+        if map < self.map_min:
+            return self.original_min
+        elif map > self.map_max:
+            return self.original_max
+        original = (map-self.map_min)/(self.map_max-self.map_min)*(self.original_max-self.original_min)+self.original_min
+        return int(original)
 
 def powerOnHandler(property, value):
     logger.debug("New value '{}' for property '{}'".format(property, value))
@@ -39,12 +64,9 @@ def volumeValueHandler(property, value):
         marantz_handler.send_command("@VOL:1")
     elif value == 'down':
         marantz_handler.send_command("@VOL:2")
-    elif int(value) < 18 and int(value) >-99:
-        if int(value) > 0:
-            marantz_handler.send_command("@VOL:0+{}".format(int(value)))
-        else:
-            marantz_handler.send_command("@VOL:0-{}".format(abs(int(value))))
-
+    else:
+        original_value = volume_mapper.map_to_original(value)
+        marantz_handler.send_command("@VOL:0-{}".format(abs(original_value)))
 
 def sourceValueHandler(property, value):
     logger.debug("New value '{}' for property '{}'".format(property, value))
@@ -75,7 +97,7 @@ def event_callback(category, value):
     if category == "PWR":
         powerProperty.update("true" if value=="2" else "false")
     elif category == "VOL":
-        volumeProperty.update(value)
+        volumeProperty.update(volume_mapper.original_to_map(value))
     elif category == "SPK":
         config = ""
         config += "a" if value[0]=="2" else ""
@@ -104,6 +126,7 @@ def main():
 
 if __name__ == '__main__':
     try:
+        volume_mapper = MarantzVolumeMapper()
         marantz_handler = MarantzSerialHandler(serial_port=SERIAL_PORT, command_delay=COMMAND_DELAY)
         marantz_handler.register_event_callback(event_callback)
         marantz_handler.initialize()
