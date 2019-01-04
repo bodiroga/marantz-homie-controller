@@ -2,6 +2,7 @@
 
 repository_owner="bodiroga"
 name="marantz-homie-controller"
+user="pi"
 
 ## Making sure only root can run our script
 if [[ $EUID -ne 0 ]]; then
@@ -29,12 +30,6 @@ else
 fi
 
 
-## Creating the marantz-homie-controller username
-echo -e '\nCreating the marantz-homie-controller username...'
-useradd -r $name
-usermod -a -G dialout $name
-
-
 ## Moving the program files to the installation directory
 echo -e '\nCopying the program to the installation (/opt/homie-marantz-controller) folder...'
 cp -rf $name/$name /opt
@@ -44,12 +39,11 @@ cp -rf $name/$name /opt
 echo -e '\nCreating the virtual environment...'
 cd /opt/$name
 python3 -m venv .env
-source .env/bin/activate
 
 
 ## Installing the required python libraries
 echo -e '\nInstalling the required python libraries...'
-pip3 install -r /tmp/$name/requirements.txt > /dev/null
+/opt/$name/.env/bin/pip3 install -r /tmp/$name/requirements.txt > /dev/null
 
 
 ## Adding the start script file

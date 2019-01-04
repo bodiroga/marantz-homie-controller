@@ -5,7 +5,8 @@ After=network.target network-online.target
 
 [Service]
 Type=simple
-User=marantz-homie-controller
+User=pi
+Group=pi
 WorkingDirectory=/opt/marantz-homie-controller
 ExecStart=/opt/marantz-homie-controller/.env/bin/python3 /opt/marantz-homie-controller/marantz-controller.py
 Restart=always
